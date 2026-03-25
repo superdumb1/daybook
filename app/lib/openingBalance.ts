@@ -5,6 +5,6 @@ export const getOpeningBalance = async () => {
     throw new Error("Failed to fetch opening balance")
   }
 
-  console.log(await res.json())
+
   return await res.json()
 }

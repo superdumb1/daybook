@@ -29,8 +29,12 @@ export const GET = async () => {
     timeZone: "Asia/Kathmandu"
   }).format(new Date())
   const result= await db.collection("day_instances").findOne({ dateKey: dateKey })
-  return Response.json({
-    success:true,
-    result:result
-  });
+  if(result){
+
+    return Response.json({
+      success:true,
+      result:result
+    });
+  }
+  else return Response.json({success:false})
 }

@@ -13,7 +13,10 @@ export default function Home() {
   }, [])
   const [isInputStartBalenceVisible, setIsInpBalVis] = useState<boolean>(true);
   useEffect(() => {
-    getOpeningBalance()
+    const balStatus=getOpeningBalance()
+    if(balStatus.success){
+      
+    }
     return () => {
       
     }
