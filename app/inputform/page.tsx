@@ -1,14 +1,14 @@
 "use client"
-import TbInput from '@/components/Inputs'
-import { useAppContext } from '@/providers/AppProvider'
+import FormInp from '@/app/inputform/Inputs'
 import React, { useState, useEffect } from 'react'
 import { addTransaction } from '../lib/TransactionInstance'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import SuccessBlip from '@/components/SuccessBlip'
 type TransactionType = "cash" | "credit" | "online"
-type EntryType = "income" | "expense"
+type EntryType = "sales" | "expense"|"purchase"
 
 export interface Transaction {
-    id: string
-    sn: number
+    id?: string
     particulars: string
     amount: number
     entryType: EntryType
@@ -19,47 +19,61 @@ export interface Transaction {
 
 
 const InputForm: React.FC = () => {
-    const [transactions, setTransactions] = useState<Transaction[]>([])
+    // const [transactions, setTransactions] = useState<Transaction[]>([])
+
     const [form, setForm] = useState<Transaction>({
-        id: "",
-        sn: 1,
         particulars: "",
         amount: 0,
         entryType: "expense",
         transactionType: "cash",
-        createdAt: new Date(),
-        lastEdited: new Date()
     })
-    const confirmInput = () => {
-        const newTransaction: Transaction = {
-            ...form,
-            id: crypto.randomUUID(),
-            createdAt: new Date(),
-            lastEdited: new Date(),
-            sn: transactions.length + 1
-        }
+    const queryClient = useQueryClient()
+    const [successBlipVis, setSuccessBlipVis] = useState(false)
 
-        setTransactions(prev => [...prev, newTransaction])
-        resetInp()
-        addTransaction({a:"a"})
+    useEffect(() => {
+        let timer: NodeJS.Timeout
+        if (successBlipVis) {
+            timer = setTimeout(() => {
+                setSuccessBlipVis(false)
+            }, 2000)
+        }
+        return () => clearTimeout(timer)
+    }, [successBlipVis])//turn off the blip
+
+    const mutation = useMutation({
+        mutationFn: addTransaction,
+
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["transactions"],
+            })
+            setSuccessBlipVis(true)
+        },
+
+    })
+
+    const confirmInput = () => {
+        if(Number(form.amount)!==0&&form.particulars.length>0) {
+
+            
+            resetInp()
+            mutation.mutate(form);
+        }
     }
+
     const resetInp = () => {
         setForm({
-                id: "",
-                sn: 1,
-                particulars: "",
-                amount: 0,
-                entryType: "expense",
-                transactionType: "cash",
-                createdAt: new Date(),
-            })
+            particulars: "",
+            amount: 0,
+            entryType: "expense",
+            transactionType: "cash",
+        })
     }
-    return (<>
-        <TbInput setForm={setForm} form={form} confirmInput={confirmInput}  resetInp={resetInp}/>
-        <form action=""></form>
-        <div></div>
-
-    </>
+    return (
+        <>
+            <FormInp setForm={setForm} form={form} confirmInput={confirmInput} resetInp={resetInp} />
+            {successBlipVis && <SuccessBlip />}
+        </>
     )
 }
 

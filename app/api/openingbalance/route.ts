@@ -2,9 +2,11 @@ import clientPromise from "@/app/lib/mongodb"
 
 export const POST = async (req: any) => {
   const body = await req.json()
-  const { openingBalence } = body
+  const openingBalance = body.amount
+
   const client = await clientPromise
-  const db = client.db("balenceSheet")
+  const db = client.db("balanceSheet")
+
   const dateKey = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Kathmandu"
   }).format(new Date())
@@ -12,11 +14,14 @@ export const POST = async (req: any) => {
   const DayInstance = {
     createdAt: new Date(),
     dateKey: dateKey,
-    openingBalence: openingBalence
+    openingBalance: openingBalance
   }
+
   const result = await db.collection("day_instances").insertOne(
     DayInstance
   )
+  if (!result) return false
+  
   return Response.json({
     success: true,
     insertedId: result.insertedId,
@@ -24,17 +29,16 @@ export const POST = async (req: any) => {
 }
 
 export const GET = async () => {
-  const db = (await clientPromise).db("balenceSheet")
+  const db = (await clientPromise).db("balanceSheet")
   const dateKey = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Kathmandu"
   }).format(new Date())
-  const result= await db.collection("day_instances").findOne({ dateKey: dateKey })
-  if(result){
-
+  const result = await db.collection("day_instances").findOne({ dateKey: dateKey })
+  if (result) {
     return Response.json({
-      success:true,
-      result:result
+      success: true,
+      result: result
     });
   }
-  else return Response.json({success:false})
+  else return Response.json({ success: false })
 }

@@ -18,7 +18,11 @@ if (process.env.NODE_ENV === "development") {
   clientPromise = global._mongoClientPromise
 } else {
   client = new MongoClient(MONGODB_URI)
-  clientPromise = client.connect()
+  clientPromise = client.connect().then((c) => {
+    console.log("✅ MongoDB connected (prod)")
+    return c
+  })
 }
+
 
 export default clientPromise

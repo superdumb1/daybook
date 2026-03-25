@@ -1,13 +1,22 @@
-import { useAppContext } from '@/providers/AppProvider'
-import React, { SetStateAction, Dispatch } from 'react'
+import { setOpeningBalance } from '@/app/lib/openingBalance'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import React, { ChangeEvent, useState } from 'react'
 
-const CheckStartBalance: React.FC<{ setIsInpBalVis: Dispatch<SetStateAction<boolean>> }> = ({ setIsInpBalVis }) => {
-  const { setOpeningBalance, openingBalance } = useAppContext()
-  const balenceSetter = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = Number(e.target.value);
-    if (Number.isNaN(val)) return;
-    setOpeningBalance(val)
+const CheckStartBalance: React.FC = () => {
+  const queryClient = useQueryClient()
+  const [val, setVal] = useState<number>(0)
+  const verifiedValSetter=(e:ChangeEvent<HTMLInputElement>)=>{
+    if(!isNaN(Number(e.target.value))) setVal(Number(e.target.value))
   }
+  const mutation = useMutation({
+    mutationFn: setOpeningBalance,
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["openingBalance"],
+      })
+    },
+  })
 
   return (
     <>
@@ -16,11 +25,14 @@ const CheckStartBalance: React.FC<{ setIsInpBalVis: Dispatch<SetStateAction<bool
       <div className='absolute h-[100vh] w-full z-6'>
         <form onSubmit={(e) => {
           e.preventDefault();
-          setIsInpBalVis(prev => !prev)
+          mutation.mutate(val)
         }} className=" bg-[#c3c3c3] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 p-4 rounded">
           <div className='p-2'>
             <label htmlFor="opening_balance" className="block text-center text-black p-2 w-full">opening balence</label>
-            <input type="text" inputMode='numeric' required className="bg-white w-[250px] block m-2 p-1 px-2 no-spinner text-black" id="opening_balance" onChange={(e) => { balenceSetter(e) }} value={openingBalance} />
+            <input type="text" inputMode='numeric'
+              required className="bg-white w-[250px] block m-2 p-1 px-2 no-spinner text-black"
+              id="opening_balance" value={val} 
+              onChange={(e) => { verifiedValSetter(e) }} />
           </div>
           <div className='px-4 py-2'>
             <button type="submit" id="confirm_opening_balence" className=" w-full bg-red-500 p-1 cursor-pointer hover:scale-[1.1]  hover:bg-red-400 hover:font-bold rounded-full"> confirm</button>

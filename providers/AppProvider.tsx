@@ -5,19 +5,14 @@ import QueryProviders from "./QuerryProvider"
 interface AppContextType {
     Balance: number,
     setBalance: Dispatch<SetStateAction<number>>
-    openingBalance: number,
-    setOpeningBalance: Dispatch<SetStateAction<number>>
-
 }
 // const
 
 const AppContext = createContext<AppContextType | null>(null)
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [openingBalance, setOpeningBalance] = useState<number>(0)
     const [Balance, setBalance] = useState<number>(0)
-
     return (
-        <AppContext.Provider value={{ Balance, setBalance, setOpeningBalance, openingBalance }}>
+        <AppContext.Provider value={{ Balance, setBalance }}>
             <QueryProviders>
                 {children}
             </QueryProviders>
