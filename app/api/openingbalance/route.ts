@@ -20,7 +20,7 @@ export const POST = async (req: any) => {
   const result = await db.collection("day_instances").insertOne(
     DayInstance
   )
-  if (!result) return false
+  if (!result) return Response.json({succcess:false},{status:400})
   
   return Response.json({
     success: true,
@@ -40,5 +40,5 @@ export const GET = async () => {
       result: result
     });
   }
-  else return Response.json({ success: false })
+  else return Response.json({ success: false },{status:400})
 }
